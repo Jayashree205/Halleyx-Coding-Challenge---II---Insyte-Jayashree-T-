@@ -1,10 +1,10 @@
-# Use Node image
-FROM node:20
+# Use Node.js 18 (more stable for most React apps)
+FROM node:18
 
-# Create app directory
+# Set working directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json for both server and client
+# Copy package files for server and client first
 COPY server/package*.json ./server/
 COPY client/package*.json ./client/
 
@@ -12,13 +12,17 @@ COPY client/package*.json ./client/
 RUN cd server && npm install
 
 # Install client dependencies
-RUN cd client && npm install && npm run build
+RUN cd client && npm install
 
-# Copy all source files
-COPY . .
+# Copy all source files for both server and client
+COPY server ./server
+COPY client ./client
 
-# Expose the port
+# Build React frontend
+RUN cd client && npm run build
+
+# Expose port
 EXPOSE 5000
 
-# Start the backend
+# Start backend
 CMD ["node", "server/server.js"]
