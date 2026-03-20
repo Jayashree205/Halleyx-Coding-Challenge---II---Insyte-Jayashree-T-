@@ -1,43 +1,59 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
+
 const app = express();
 
+// ----------------------
 // Middleware
+// ----------------------
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/order_insight_dashboard';
+// ----------------------
+// MongoDB connection
+// ----------------------
+const MONGODB_URI =
+  process.env.MONGODB_URI ||
+  'mongodb://localhost:27017/order_insight_dashboard';
 
-mongoose.connect(MONGODB_URI)
+mongoose
+  .connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log('MongoDB connection error:', err));
+  .catch((err) => console.error('MongoDB connection error:', err));
 
-// Routes
-const orderRoutes = require('./routes/orders');
-const dashboardRoutes = require('./routes/dashboards');
-const widgetRoutes = require('./routes/widgets');
-const userRoutes = require('./routes/users');
+// ----------------------
+// API Routes
+// ----------------------
+app.use('/api/orders', require('./routes/orders'));
+app.use('/api/dashboards', require('./routes/dashboards'));
+app.use('/api/widgets', require('./routes/widgets'));
+app.use('/api/users', require('./routes/users'));
 
-app.use('/api/orders', orderRoutes);
-app.use('/api/dashboards', dashboardRoutes);
-app.use('/api/widgets', widgetRoutes);
-app.use('/api/users', userRoutes);
+// ----------------------
+// Serve React frontend in production
+// ----------------------
+if (process.env.NODE_ENV === 'production') {
+  const clientBuildPath = path.join(__dirname, '../client/build');
+  app.use(express.static(clientBuildPath));
 
-// For local development: serve React build
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-  const path = require('path');
-  const PORT = process.env.PORT || 5000;
-  app.use(express.static(path.join(__dirname, '../client/build')));
-  app.get('*all', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-  });
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  // Catch-all route for React SPA
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
   });
 }
 
-// Export for Vercel serverless
+// ----------------------
+// Start server locally
+// ----------------------
+const PORT = process.env.PORT || 5000;
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+// ----------------------
+// Export app for serverless (optional for Vercel)
+// ----------------------
 module.exports = app;
