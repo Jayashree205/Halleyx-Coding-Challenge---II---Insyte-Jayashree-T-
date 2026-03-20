@@ -1,16 +1,7 @@
-// Suppress DEP0060 warning
-const originalEmitWarning = process.emitWarning;
-process.emitWarning = (warning, ...args) => {
-  if (typeof warning === 'string' && warning.includes('DEP0060')) return;
-  if (warning instanceof Error && warning.code === 'DEP0060') return;
-  return originalEmitWarning(warning, ...args);
-};
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
@@ -18,12 +9,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection
-mongoose.connect('mongodb://localhost:27017/order_insight_dashboard', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/order_insight_dashboard';
+
+mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+  .catch(err => console.log('MongoDB connection error:', err));
 
 // Routes
 const orderRoutes = require('./routes/orders');
@@ -36,16 +26,18 @@ app.use('/api/dashboards', dashboardRoutes);
 app.use('/api/widgets', widgetRoutes);
 app.use('/api/users', userRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// For local development: serve React build
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  const path = require('path');
+  const PORT = process.env.PORT || 5000;
+  app.use(express.static(path.join(__dirname, '../client/build')));
+  app.get('*all', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+  });
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
-const path = require('path');
-
-// Serve React build folder
-app.use(express.static(path.join(__dirname, '../client/build')));
-
-// Return index.html for all other routes (React routing)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-});
+// Export for Vercel serverless
+module.exports = app;
