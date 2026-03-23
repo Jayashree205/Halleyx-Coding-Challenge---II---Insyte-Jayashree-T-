@@ -78,7 +78,7 @@ function Home({ onStartBuilding }) {
         <Container fluid className="px-3 px-md-4 px-lg-5">
           <Row className="align-items-center g-4 g-md-5 g-lg-6">
             {/* LEFT COLUMN: TEXT CONTENT */}
-            <Col xs={12} lg={6} className="d-flex flex-column justify-content-center order-2 order-lg-1">
+            <Col xs={12} lg={6} className="d-flex flex-column justify-content-center">
               {/* Badge */}
               <div className="badge-container mb-3 mb-md-4 d-flex align-items-center gap-2 px-3 py-2 w-fit" style={{
                 display: 'inline-flex',
@@ -228,7 +228,7 @@ function Home({ onStartBuilding }) {
             </Col>
 
             {/* RIGHT COLUMN: DASHBOARD PREVIEW */}
-            <Col xs={12} lg={6} className="d-flex justify-content-center align-items-center order-1 order-lg-2 mb-4 mb-md-5 mb-lg-0">
+            <Col xs={12} lg={6} className="d-flex justify-content-center align-items-center mb-4 mb-md-5 mb-lg-0">
               <div className="dashboard-preview-container" style={{
                 width: '100%',
                 maxWidth: '600px',

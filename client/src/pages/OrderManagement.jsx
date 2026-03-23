@@ -3,6 +3,46 @@ import axios from 'axios';
 import { Container, Row, Col, Button, Modal, Form, Table, Card, Badge, Dropdown, InputGroup, Alert } from 'react-bootstrap';
 import OrderModal from '../components/OrderModal.jsx';
 
+const countriesList = [
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", 
+  "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", 
+  "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", 
+  "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo (Congo-Brazzaville)", "Costa Rica", 
+  "Croatia", "Cuba", "Cyprus", "Czech Republic", "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", 
+  "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", 
+  "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", 
+  "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", 
+  "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", 
+  "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", 
+  "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", 
+  "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", 
+  "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", 
+  "Palau", "Palestine (observer)", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", 
+  "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", 
+  "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", 
+  "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", 
+  "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", 
+  "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City (Holy See)", 
+  "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+];
+
+const currencies = [
+  { code: 'USD', symbol: '$', name: 'USA - Dollar' },
+  { code: 'EUR', symbol: '€', name: 'Europe - Euro' },
+  { code: 'GBP', symbol: '£', name: 'UK - Pound' },
+  { code: 'INR', symbol: '₹', name: 'India - Rupee' },
+  { code: 'JPY', symbol: '¥', name: 'Japan - Yen' },
+  { code: 'CAD', symbol: 'C$', name: 'Canada - Dollar' },
+  { code: 'AUD', symbol: 'A$', name: 'Australia - Dollar' },
+];
+
+const products = [
+  "Honey", "Groceries", "Organic Eggs", "Fresh Milk", "Whole Wheat Bread", "Snacks Pack", "Vitamins", "Energy Drinks", 
+  "Fiber Internet 300 Mbps", "5GUnlimited Mobile Plan", "Fiber Internet 1 Gbps", "Business Internet 500 Mbps", "VoIP Corporate Package", 
+  "Make your own product"
+];
+const statuses = ["Pending", "In Progress", "Completed"];
+
 function OrderManagement({ user }) {
   const [orders, setOrders] = useState([]);
   const [dashboards, setDashboards] = useState([]);
@@ -11,73 +51,9 @@ function OrderManagement({ user }) {
   const [show, setShow] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
   const [selectedOrderIds, setSelectedOrderIds] = useState([]);
-  const [formValidated, setFormValidated] = useState(false);
-  const [searchCountry, setSearchCountry] = useState('');
   const [successAlert, setSuccessAlert] = useState(null);
-  const [customProduct, setCustomProduct] = useState('');
-  const [showCustomProductInput, setShowCustomProductInput] = useState(false);
-  const [formData, setFormData] = useState({
-    customer: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      address: { street: '', city: '', state: '', postalCode: '', country: '' },
-    },
-    order: { product: '', quantity: 1, unitPrice: 0, status: 'Pending', createdBy: user?.username || '', currency: 'USD' },
-  });
 
   const [dashboardMode, setDashboardMode] = useState(null);
-
-  useEffect(() => {
-    const dm = sessionStorage.getItem('dashboardMode');
-    if (dm) {
-        setDashboardMode(dm);
-        if (dm === 'create') {
-            setSelectedDashboardId('new');
-        }
-    }
-  }, []);
-
-  const countriesList = [
-    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", 
-    "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", 
-    "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", 
-    "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo (Congo-Brazzaville)", "Costa Rica", 
-    "Croatia", "Cuba", "Cyprus", "Czech Republic", "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", 
-    "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", 
-    "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", 
-    "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", 
-    "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", 
-    "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", 
-    "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", 
-    "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", 
-    "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", 
-    "Palau", "Palestine (observer)", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", 
-    "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", 
-    "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", 
-    "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", 
-    "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", 
-    "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City (Holy See)", 
-    "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-  ];
-
-  const currencies = [
-    { code: 'USD', symbol: '$', name: 'USA - Dollar' },
-    { code: 'EUR', symbol: '€', name: 'Europe - Euro' },
-    { code: 'GBP', symbol: '£', name: 'UK - Pound' },
-    { code: 'INR', symbol: '₹', name: 'India - Rupee' },
-    { code: 'JPY', symbol: '¥', name: 'Japan - Yen' },
-    { code: 'CAD', symbol: 'C$', name: 'Canada - Dollar' },
-    { code: 'AUD', symbol: 'A$', name: 'Australia - Dollar' },
-  ];
-
-  const products = [
-    "Honey", "Groceries", "Organic Eggs", "Fresh Milk", "Whole Wheat Bread", "Snacks Pack", "Vitamins", "Energy Drinks", 
-    "Fiber Internet 300 Mbps", "5GUnlimited Mobile Plan", "Fiber Internet 1 Gbps", "Business Internet 500 Mbps", "VoIP Corporate Package", 
-    "Make your own product"
-  ];
-  const statuses = ["Pending", "In Progress", "Completed"];
 
   useEffect(() => {
     fetchOrders();
@@ -96,7 +72,8 @@ function OrderManagement({ user }) {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get('/api/orders');
+      const userId = user?._id || JSON.parse(sessionStorage.getItem('user'))?._id;
+      const res = await axios.get(`/api/orders${userId ? `?userId=${userId}` : ''}`);
       setOrders(res.data);
     } catch (err) {
       console.error("Error fetching orders:", err);
@@ -121,75 +98,6 @@ function OrderManagement({ user }) {
       console.error("Error fetching dashboards:", err);
     }
   };
-
-  const handleSubmit = async (e) => {
-    const form = e.currentTarget;
-    e.preventDefault();
-    
-    if (!formData.customer.email || !formData.customer.phone || form.checkValidity() === false) {
-      e.stopPropagation();
-      setFormValidated(true);
-      return;
-    }
-
-    let finalProduct = formData.order.product;
-    if (showCustomProductInput && customProduct) {
-        finalProduct = customProduct;
-    }
-
-    const payload = { 
-        ...formData, 
-        order: { 
-            ...formData.order, 
-            product: finalProduct,
-            totalAmount: formData.order.quantity * formData.order.unitPrice 
-        } 
-    };
-
-    try {
-      let result;
-      if (editingOrder) {
-        result = await axios.put(`/api/orders/${editingOrder._id}`, payload);
-      } else {
-        result = await axios.post('/api/orders', payload);
-      }
-      
-      const orderId = result.data.data?._id || result.data._id || '0001';
-      setSuccessAlert(`Nice work! Your new order "ORD-${orderId.substring(orderId.length - 4).toUpperCase()}" is now in the list!`);
-      
-      fetchOrders();
-      setShow(false);
-      resetForm();
-      
-      setTimeout(() => setSuccessAlert(null), 5000);
-    } catch (err) { console.error("Error saving order:", err); }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      customer: { firstName: '', lastName: '', email: '', phone: '', address: { street: '', city: '', state: '', postalCode: '', country: '' } },
-      order: { product: '', quantity: 1, unitPrice: 0, status: 'Pending', createdBy: user?.username || '', currency: 'USD' },
-    });
-    setEditingOrder(null);
-    setFormValidated(false);
-    setSearchCountry('');
-    setCustomProduct('');
-    setShowCustomProductInput(false);
-  };
-
-  const handleProductChange = (e) => {
-    const val = e.target.value;
-    if (val === 'Make your own product') {
-        setShowCustomProductInput(true);
-    } else {
-        setShowCustomProductInput(false);
-    }
-    setFormData({...formData, order: {...formData.order, product: val}});
-  };
-
-  const filteredCountries = useMemo(() => {
-    return countriesList.filter(c => c.toLowerCase().includes(searchCountry.toLowerCase()));
-  }, [searchCountry]);
 
   const formatDate = (dateString, includeTime = false) => {
     if (!dateString) return 'N/A';
@@ -222,7 +130,7 @@ function OrderManagement({ user }) {
           )}
 
           <div className="d-flex flex-wrap gap-2 w-100 w-lg-auto">
-            <Button className="btn-success px-4 flex-grow-1 flex-md-grow-0" style={{ borderRadius: '8px' }} onClick={() => { resetForm(); setShow(true); }}>
+            <Button className="btn-success px-4 flex-grow-1 flex-md-grow-0" style={{ borderRadius: '8px' }} onClick={() => { setEditingOrder(null); setShow(true); }}>
               <i className="bi bi-plus-lg me-2"></i>Create order
             </Button>
             <Button
@@ -234,7 +142,6 @@ function OrderManagement({ user }) {
                 const order = orders.find(o => o._id === selectedOrderIds[0]);
                 if (order) {
                   setEditingOrder(order);
-                  setFormData(order);
                   setShow(true);
                 }
               }}
@@ -353,7 +260,7 @@ function OrderManagement({ user }) {
             <Table hover className="mb-0 align-middle" style={{ minWidth: '1800px' }}>
             <thead className="bg-light bg-opacity-50 border-bottom border-light">
                 <tr>
-                          <th className="py-3 px-4 fw-medium text-muted small text-nowrap">Select</th>
+                    <th className="py-3 px-4 fw-medium text-muted small text-nowrap" style={{ position: 'sticky', left: 0, background: '#f8f9fa', zIndex: 2, borderRight: '1px solid #f1f3f5' }}>Select</th>
                     <th className="py-3 px-4 fw-medium text-muted small text-nowrap">S.no</th>
                     <th className="py-3 fw-medium text-muted small text-nowrap">Customer ID</th>
                     <th className="py-3 fw-medium text-muted small text-nowrap">Customer name</th>
@@ -369,7 +276,7 @@ function OrderManagement({ user }) {
                     <th className="py-3 fw-medium text-muted small text-nowrap">Total amount</th>
                     <th className="py-3 fw-medium text-muted small text-nowrap">Status</th>
                     <th className="py-3 fw-medium text-muted small text-nowrap">Created by</th>
-                    <th className="py-3 text-center"><i className="bi bi-three-dots-vertical text-muted"></i></th>
+                    <th className="py-3 text-center" style={{ position: 'sticky', right: 0, background: '#f8f9fa', zIndex: 2, boxShadow: '-4px 0 8px rgba(0,0,0,0.03)' }}><i className="bi bi-three-dots-vertical text-muted"></i></th>
                 </tr>
             </thead>
             <tbody>
@@ -379,7 +286,7 @@ function OrderManagement({ user }) {
                   key={order._id}
                     className={`border-bottom border-light ${selectedOrderIds.includes(order._id) ? 'bg-primary bg-opacity-10' : ''}`}
                 >
-                    <td className="px-4 text-center">
+                    <td className="px-4 text-center" style={{ position: 'sticky', left: 0, background: selectedOrderIds.includes(order._id) ? '#f2f9f6' : 'white', zIndex: 1, borderRight: '1px solid #f1f3f5' }}>
                       <Form.Check
                         type="checkbox"
                         name="selectedOrder"
@@ -444,7 +351,7 @@ function OrderManagement({ user }) {
                         </Badge>
                     </td>
                     <td className="text-muted small">{order.order.createdBy}</td>
-                    <td className="px-3 text-center">
+                    <td className="px-3 text-center" style={{ position: 'sticky', right: 0, background: selectedOrderIds.includes(order._id) ? '#f2f9f6' : 'white', zIndex: 1, boxShadow: '-4px 0 8px rgba(0,0,0,0.02)' }}>
                       <div className="d-flex justify-content-center gap-2">
                         <Button
                           variant="outline-primary"
@@ -454,15 +361,6 @@ function OrderManagement({ user }) {
                           onClick={() => {
                             setSelectedOrderIds([order._id]);
                             setEditingOrder(order);
-                            setFormData(order);
-                            if (!products.filter(p => p !== "Make your own product").includes(order.order.product)) {
-                                setShowCustomProductInput(true);
-                                setCustomProduct(order.order.product);
-                                setFormData(prev => ({...prev, order: {...prev.order, product: "Make your own product"}}));
-                            } else {
-                                setShowCustomProductInput(false);
-                                setCustomProduct('');
-                            }
                             setShow(true);
                           }}
                         >

@@ -2,10 +2,15 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 
-// Get all orders
+// Get all orders for a user
 router.get('/', async (req, res) => {
   try {
-    const orders = await Order.find();
+    const { userId } = req.query;
+    // Strict isolation: if no userId is provided, return empty array or error.
+    if (!userId) {
+      return res.json([]);
+    }
+    const orders = await Order.find({ userId });
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -16,6 +21,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   const order = new Order({
     customer: req.body.customer,
+    userId: req.body.userId,
     order: {
       ...req.body.order,
       totalAmount: req.body.order.items && req.body.order.items.length > 0

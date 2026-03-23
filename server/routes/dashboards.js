@@ -17,8 +17,14 @@ router.get('/', async (req, res) => {
 
 // Get aggregated data for widgets
 router.get('/data', async (req, res) => {
-  const { filter, customerEmail, orderIds } = req.query;
-  let query = {};
+  const { filter, customerEmail, orderIds, userId } = req.query;
+  
+  // Strict isolation
+  if (!userId) {
+    return res.json({ totalRevenue: 0, productCounts: {}, orders: [] });
+  }
+
+  let query = { userId };
 
   if (filter) {
     const now = new Date();
@@ -111,57 +117,5 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// Get aggregated data for widgets
-router.get('/data', async (req, res) => {
-  const { filter, customerEmail, orderIds } = req.query;
-  let query = {};
-
-  if (filter) {
-    const now = new Date();
-    switch (filter) {
-      case 'today':
-        query.createdAt = { $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) };
-        break;
-      case 'last7days':
-        query.createdAt = { $gte: new Date(now - 7 * 24 * 60 * 60 * 1000) };
-        break;
-      case 'last30days':
-        query.createdAt = { $gte: new Date(now - 30 * 24 * 60 * 60 * 1000) };
-        break;
-      case 'last90days':
-        query.createdAt = { $gte: new Date(now - 90 * 24 * 60 * 60 * 1000) };
-        break;
-      default:
-        break;
-    }
-  }
-
-  if (orderIds) {
-    const ids = orderIds.split(',').map(i => i.trim()).filter(Boolean);
-    if (ids.length > 0) {
-      query._id = { $in: ids };
-    }
-  } else if (customerEmail) {
-    const emails = customerEmail.split(',').map(e => e.trim()).filter(Boolean);
-    if (emails.length === 1) {
-      query['customer.email'] = emails[0];
-    } else if (emails.length > 1) {
-      query['customer.email'] = { $in: emails };
-    }
-  }
-
-  try {
-    const orders = await Order.find(query);
-    // Aggregate data as needed for charts/KPIs
-    const totalRevenue = orders.reduce((sum, order) => sum + order.order.totalAmount, 0);
-    const productCounts = orders.reduce((acc, order) => {
-      acc[order.order.product] = (acc[order.order.product] || 0) + order.order.quantity;
-      return acc;
-    }, {});
-    res.json({ totalRevenue, productCounts, orders });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
 
 module.exports = router;

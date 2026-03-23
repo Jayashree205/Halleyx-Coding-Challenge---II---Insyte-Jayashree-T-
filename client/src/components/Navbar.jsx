@@ -35,17 +35,17 @@ function NavbarComponent({ user, onLogout }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '40px',
-            height: '40px',
-            borderRadius: '12px',
+            width: '48px',
+            height: '48px',
+            borderRadius: '14px',
             background: 'linear-gradient(135deg, rgba(46, 125, 50, 0.1) 0%, rgba(25, 118, 210, 0.05) 100%)',
-            border: '1.5px solid rgba(46, 125, 50, 0.2)',
+            border: '2px solid rgba(46, 125, 50, 0.2)',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
           }}>
             <img 
               src={logo} 
               alt="Insyte Logo" 
-              height="28" 
+              height="34" 
               className="d-inline-block"
               style={{ filter: 'drop-shadow(0 0 8px rgba(46, 125, 50, 0.3))' }}
             />
@@ -79,18 +79,18 @@ function NavbarComponent({ user, onLogout }) {
             )}
           </Nav>
           
-          <div className="d-flex flex-column flex-lg-row align-items-center gap-2 gap-md-3 mt-3 mt-lg-0 w-100 w-lg-auto justify-content-center justify-content-lg-end">
+            <div className="d-flex flex-wrap align-items-center gap-2 gap-md-3 mt-3 mt-lg-0 justify-content-center justify-content-lg-end">
             {user ? (
               <>
                 {/* Profile Section - Hidden on Mobile */}
                 <div 
-                  className="d-none d-md-flex align-items-center gap-2 cursor-pointer hover-lift transition-all p-2 rounded" 
+                  className="d-none d-lg-flex align-items-center gap-2 cursor-pointer hover-lift transition-all p-2 rounded" 
                   style={{ cursor: 'pointer' }}
                   onClick={() => handleNavClick('/profile')}
                   role="button"
                   tabIndex="0"
                 >
-                  <div className="bg-primary bg-opacity-10 p-2 rounded-circle" style={{ minWidth: '36px' }}>
+                  <div className="bg-primary bg-opacity-10 p-2 rounded-circle" style={{ minWidth: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <i className="bi bi-person-fill text-primary"></i>
                   </div>
                   <div className="d-flex flex-column text-start" style={{ minWidth: '0' }}>
@@ -102,28 +102,29 @@ function NavbarComponent({ user, onLogout }) {
                 {/* Mobile Profile Icon */}
                 <Button 
                   variant="light" 
-                  className="d-md-none rounded-circle p-2" 
+                  className="d-lg-none rounded-pill p-2 w-100 d-flex justify-content-center align-items-center gap-2" 
                   onClick={() => handleNavClick('/profile')}
                   title="Profile"
-                  style={{ minWidth: '44px', minHeight: '44px' }}
+                  style={{ minHeight: '44px' }}
                 >
-                  <i className="bi bi-person-fill text-primary fs-5"></i>
+                  <i className="bi bi-person-fill text-primary"></i>
+                  <span className="fw-medium text-dark">Profile Settings</span>
                 </Button>
                 
                 {/* Logout Button */}
                 <Button 
                   variant="outline-danger" 
                   size="sm" 
-                  className="rounded-pill px-2 py-1 hover-lift w-md-auto"
+                  className="rounded-pill px-3 py-2 hover-lift d-flex justify-content-center align-items-center gap-2"
                   onClick={handleLogout}
-                  style={{ minHeight: '36px', maxWidth: '140px' }}
+                  style={{ minHeight: '44px', minWidth: '120px' }}
                 >
-                  <i className="bi bi-box-arrow-right me-1"></i>
-                  <span className="d-none d-sm-inline">Logout</span>
+                  <i className="bi bi-box-arrow-right"></i>
+                  <span>Logout</span>
                 </Button>
               </>
             ) : (
-              <div className="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
+              <div className="d-flex flex-wrap justify-content-center gap-2">
                 <Button 
                   variant="link" 
                   className="text-secondary text-decoration-none fw-bold" 
@@ -134,7 +135,7 @@ function NavbarComponent({ user, onLogout }) {
                 </Button>
                 <Button 
                   variant="primary" 
-                  className="btn-premium rounded-pill px-4 w-100 w-md-auto" 
+                  className="btn-premium rounded-pill px-4" 
                   onClick={() => handleNavClick('/signup')}
                   style={{ minHeight: '44px' }}
                 >

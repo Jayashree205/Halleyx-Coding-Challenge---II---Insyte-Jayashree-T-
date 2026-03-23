@@ -1,0 +1,70 @@
+[
+  {
+    "_id": "69c14330e202c07cd4f14880",
+    "customer": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john@gmail.com",
+      "phone": "1234567890",
+      "address": {
+        "street": "",
+        "city": "",
+        "state": "",
+        "postalCode": "",
+        "country": ""
+      }
+    },
+    "order": {
+      "items": [
+        {
+          "product": "Laptop",
+          "quantity": 11,
+          "unitPrice": 1000,
+          "totalAmount": 11000,
+          "batches": 1,
+          "_id": "69c14330e202c07cd4f14881"
+        }
+      ],
+      "totalAmount": 11000,
+      "status": "Pending",
+      "createdBy": "Test User",
+      "currency": "USD"
+    },
+    "createdAt": "2026-03-23T13:42:08.590Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c142e2e202c07cd4f14860",
+    "customer": {
+      "firstName": "John Doe",
+      "lastName": "Doe",
+      "email": "john@gmail.com",
+      "phone": "1234567890",
+      "address": {
+        "street": "",
+        "city": "",
+        "state": "",
+        "postalCode": "",
+        "country": ""
+      }
+    },
+    "order": {
+      "items": [
+        {
+          "product": "Laptop",
+          "quantity": 11,
+          "unitPrice": 1000,
+          "totalAmount": 11000,
+          "batches": 1,
+          "_id": "69c142e2e202c07cd4f14861"
+        }
+      ],
+      "totalAmount": 11000,
+      "status": "Pending",
+      "createdBy": "Test User",
+      "currency": "USD"
+    },
+    "createdAt": "2026-03-23T13:40:50.895Z",
+    "__v": 0
+  }
+]

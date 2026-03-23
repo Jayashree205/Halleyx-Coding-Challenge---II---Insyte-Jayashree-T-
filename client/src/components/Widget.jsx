@@ -383,11 +383,11 @@ function Widget({ widget, data, isConfiguring, onRemove, onSettings, customerFil
             </div>
           )}
           {isConfiguring && (
-            <div className="widget-actions transition-all">
-              <Button variant="light" size="sm" className="me-1 p-1" onClick={onSettings}>
+            <div className="widget-actions transition-all d-flex gap-2">
+              <Button variant="light" size="sm" className="p-2 d-flex align-items-center justify-content-center" style={{ minWidth: '44px', minHeight: '44px' }} onClick={onSettings} title="Settings">
                 <i className="bi bi-gear-fill text-muted"></i>
               </Button>
-              <Button variant="light" size="sm" className="p-1" onClick={onRemove}>
+              <Button variant="light" size="sm" className="p-2 d-flex align-items-center justify-content-center" style={{ minWidth: '44px', minHeight: '44px' }} onClick={onRemove} title="Remove">
                 <i className="bi bi-trash-fill text-danger"></i>
               </Button>
             </div>

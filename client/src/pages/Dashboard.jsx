@@ -34,9 +34,11 @@ function Dashboard() {
 
   const fetchData = useCallback(async () => {
     try {
+      const user = JSON.parse(sessionStorage.getItem('user'));
+      const userIdStr = user?._id ? `&userId=${user._id}` : '';
       const orderIdsQuery = dashboardOrderIds?.length ? `&orderIds=${encodeURIComponent(dashboardOrderIds.join(','))}` : '';
       const customerQuery = !dashboardOrderIds?.length && customerEmailFilter ? `&customerEmail=${encodeURIComponent(customerEmailFilter)}` : '';
-      const res = await axios.get(`/api/dashboards/data?filter=${filter}${orderIdsQuery}${customerQuery}`);
+      const res = await axios.get(`/api/dashboards/data?filter=${filter}${orderIdsQuery}${customerQuery}${userIdStr}`);
       setData(res.data);
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -63,7 +65,9 @@ function Dashboard() {
       const ids = w?.config?.orderIds;
       if (Array.isArray(ids) && ids.length) {
         try {
-          const res = await axios.get(`/api/dashboards/data?orderIds=${encodeURIComponent(ids.join(','))}${filterQuery}`);
+          const user = JSON.parse(sessionStorage.getItem('user'));
+          const userIdStr = user?._id ? `&userId=${user._id}` : '';
+          const res = await axios.get(`/api/dashboards/data?orderIds=${encodeURIComponent(ids.join(','))}${filterQuery}${userIdStr}`);
           dataMap[w.id] = res.data;
         } catch (e) {
           console.error('Error loading widget order data for widget', w.id, e);
@@ -76,8 +80,9 @@ function Dashboard() {
 
   const fetchDashboards = useCallback(async (preferredId) => {
     try {
-      // Load all dashboards so everyone can view, edit, and delete shared dashboards.
-      const res = await axios.get('/api/dashboards');
+      const user = JSON.parse(sessionStorage.getItem('user'));
+      const userIdStr = user?._id ? `?userId=${user._id}` : '';
+      const res = await axios.get(`/api/dashboards${userIdStr}`);
       setDashboards(res.data || []);
       
       if (res.data && res.data.length > 0) {
@@ -168,7 +173,9 @@ function Dashboard() {
 
     const filterQuery = filter && filter !== 'all' ? `&filter=${filter}` : '';
     try {
-      const res = await axios.get(`/api/dashboards/data?orderIds=${encodeURIComponent(ids.join(','))}${filterQuery}`);
+      const user = JSON.parse(sessionStorage.getItem('user'));
+      const userIdStr = user?._id ? `&userId=${user._id}` : '';
+      const res = await axios.get(`/api/dashboards/data?orderIds=${encodeURIComponent(ids.join(','))}${filterQuery}${userIdStr}`);
       setWidgetDataMap(prev => ({ ...prev, [widget.id]: res.data }));
     } catch (err) {
       console.error('Error refreshing widget data:', err);
@@ -252,8 +259,10 @@ function Dashboard() {
       // Make sure the newly created dashboard is selected and its data is loaded
       await fetchDashboards(res.data._id);
       
+      const user = JSON.parse(sessionStorage.getItem('user'));
+      const userIdStr = user?._id ? `&userId=${user._id}` : '';
       const orderQuery = orderIds.length ? `&orderIds=${encodeURIComponent(orderIds.join(','))}` : '';
-      const dataRes = await axios.get(`/api/dashboards/data?filter=${filter}${orderQuery}`);
+      const dataRes = await axios.get(`/api/dashboards/data?filter=${filter}${orderQuery}${userIdStr}`);
       setData(dataRes.data);
 
       // Auto-open config modal so user can configure widgets
@@ -451,16 +460,16 @@ function Dashboard() {
           <h1 className="fw-bold mb-1" style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)' }}>Analytics Dashboard</h1>
           <p className="text-muted mb-0" style={{ fontSize: 'clamp(0.85rem, 2vw, 1rem)' }}>Monitor your customer order performance and metrics.</p>
         </div>
-        <div className="d-flex flex-column flex-sm-row flex-md-row gap-2 gap-md-3 align-items-stretch align-md-center w-100 w-md-auto justify-content-md-end">
-          <Dropdown className="w-100 w-md-auto">
-            <Dropdown.Toggle variant="white" className="glass-card py-2 px-3 border-0 d-flex align-items-center gap-2 w-100 w-md-auto justify-content-between" style={{ fontSize: 'clamp(0.85rem, 2vw, 0.95rem)' }}>
+        <div className="d-flex flex-wrap gap-2 gap-md-3 align-items-center w-100 w-md-auto justify-content-start justify-content-md-end mt-2 mt-md-0">
+          <Dropdown className="flex-grow-1 flex-sm-grow-0">
+            <Dropdown.Toggle variant="white" className="glass-card py-2 px-3 border-0 d-flex align-items-center gap-2 w-100 justify-content-between" style={{ fontSize: 'clamp(0.85rem, 2vw, 0.95rem)', minHeight: '44px' }}>
               <span className="d-flex align-items-center gap-2">
                 <i className="bi bi-calendar3 text-primary"></i>
                 <span className="fw-medium d-none d-sm-inline">{filterLabels[filter]}</span>
                 <span className="fw-medium d-sm-none">{filterLabels[filter].split(' ')[0]}</span>
               </span>
             </Dropdown.Toggle>
-            <Dropdown.Menu className="shadow border-light w-100 w-md-auto">
+            <Dropdown.Menu className="shadow border-light w-100">
               {Object.entries(filterLabels).map(([key, label]) => (
                 <Dropdown.Item key={key} onClick={() => setFilter(key)} className="py-2" style={{ fontSize: '0.9rem' }}>
                   {label}
@@ -468,22 +477,15 @@ function Dashboard() {
               ))}
             </Dropdown.Menu>
           </Dropdown>
-          <Button variant="outline-primary" className="py-2 px-3 px-md-4 w-100 w-md-auto" style={{ minHeight: '44px', fontSize: '0.85rem' }} onClick={() => navigateToOrders(currentDashboard?._id)}>
+          <Button variant="outline-primary" className="py-2 px-3 px-md-4 flex-grow-1 flex-sm-grow-0" style={{ minHeight: '44px', fontSize: '0.85rem' }} onClick={() => navigateToOrders(currentDashboard?._id)}>
             <i className="bi bi-plus-circle me-2"></i>
-            <span className="d-inline d-sm-inline">Add Orders</span>
+            <span className="d-inline">Add Orders</span>
           </Button>
-          <Button variant="primary" className="btn-premium py-2 px-3 px-md-4 w-100 w-md-auto" style={{ minHeight: '44px', fontSize: '0.85rem' }} onClick={() => handleOpenConfig(currentDashboard?._id || 'new')}>
+          <Button variant="primary" className="btn-premium py-2 px-3 px-md-4 flex-grow-1 flex-sm-grow-0" style={{ minHeight: '44px', fontSize: '0.85rem' }} onClick={() => handleOpenConfig(currentDashboard?._id || 'new')}>
             <i className="bi bi-gear-fill me-2"></i>
             <span className="d-none d-sm-inline">Configure</span>
+            <span className="d-sm-none">Settings</span>
           </Button>
-          <Button variant="outline-secondary" className="py-2 px-3 px-md-4 w-100 w-md-auto d-none d-sm-block" style={{ minHeight: '44px', fontSize: '0.85rem' }} onClick={fetchData}>
-            <i className="bi bi-arrow-clockwise me-1"></i>Refresh
-          </Button>
-          {currentDashboard && (
-            <Button variant="outline-danger" className="py-2 px-3 px-md-4 w-100 w-md-auto d-none d-sm-block" style={{ minHeight: '44px', fontSize: '0.85rem' }} onClick={() => handleDeleteDashboard(currentDashboard._id)}>
-              <i className="bi bi-trash-fill me-1"></i>Delete
-            </Button>
-          )}
         </div>
       </div>
 
@@ -495,7 +497,7 @@ function Dashboard() {
                     <i className="bi bi-plus-lg me-1"></i>Create New
                 </Button>
             </div>
-            <div className="d-flex gap-2 gap-md-3 flex-nowrap overflow-auto pb-2" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="dashboard-tabs-scroll">
                 {dashboards.map(d => (
                     <Card 
                         key={d._id} 
@@ -545,7 +547,7 @@ function Dashboard() {
         <div className="text-center py-4 py-md-5 mt-4 mt-md-5">
           <div className="glass-card d-inline-block p-3 p-md-5 text-center">
             <i className="bi bi-bar-chart-line text-muted mb-3 mb-md-4 d-block" style={{ fontSize: 'clamp(2rem, 10vw, 4rem)' }}></i>
-            <h3 className="fw-bold mb-2 mb-md-3" style={{ fontSize: 'clamp(1.25rem, 4vw, 1.75rem)' }}>No Dashboards Created</h3>
+            <h3 className="fw-bold mb-2 mb-md-3" style={{ fontSize: 'clamp(1.25rem, 4vw, 1.75rem)' }}>Welcome! Create your first Dashboard</h3>
             <p className="text-muted mb-4 mb-md-4" style={{ fontSize: 'clamp(0.85rem, 2vw, 1rem)', maxWidth: '400px' }}>You haven't created any custom dashboards yet. Start by adding customer orders to generate insights.</p>
             <Button 
                 className="btn-premium px-3 px-md-5 py-2 py-md-3" 

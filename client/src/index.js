@@ -2,6 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App.jsx';
+import axios from 'axios';
+
+// Set base URL for API calls to avoid requiring a proxy restart in development
+axios.defaults.baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : '';
 
 // Suppress DEP0060 warning
 if (typeof process !== 'undefined' && process.emitWarning) {

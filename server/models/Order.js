@@ -31,6 +31,7 @@ const orderSchema = new mongoose.Schema({
     currency: { type: String, default: 'USD' },
   },
   createdAt: { type: Date, default: Date.now },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 });
 
 module.exports = mongoose.model('Order', orderSchema);

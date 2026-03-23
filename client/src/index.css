@@ -484,7 +484,7 @@ body {
 
   .react-grid-item {
     min-width: 100% !important;
-    min-height: 250px;
+    min-height: 200px;
     margin-bottom: 1rem;
   }
 
@@ -745,6 +745,27 @@ img {
   width: 100%;
   padding: 0;
   transition: all 0.3s ease;
+  overflow-x: hidden; /* Prevent horizontal body scroll from grid */
+}
+
+.dashboard-tabs-scroll {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+
+.dashboard-tabs-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.dashboard-tabs-scroll::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 10px;
 }
 
 /* Base Grid Layout Styles */
@@ -1508,7 +1529,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Responsive Adjustments */
 @media (max-width: 1199px) {
   .hero-section-modern {
-    minHeight: auto;
+    min-height: auto;
   }
 
   .dashboard-preview-container {
