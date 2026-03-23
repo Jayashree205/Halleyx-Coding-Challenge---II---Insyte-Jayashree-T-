@@ -19,8 +19,16 @@
       "dest": "server/server.js"
     },
     {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
       "src": "/(.*)",
-      "dest": "client/$1"
+      "dest": "/$1"
     }
   ]
 }
