@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "cd server && npm start",
-    "build": "cd client && npm install --legacy-peer-deps && CI=false npm run build",
+    "build": "npm install --prefix client --legacy-peer-deps && npm run build --prefix client",
     "heroku-postbuild": "npm run build"
   },
   "dependencies": {
