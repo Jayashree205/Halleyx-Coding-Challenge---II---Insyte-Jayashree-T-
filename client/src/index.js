@@ -4,8 +4,10 @@ import './index.css';
 import App from './App.jsx';
 import axios from 'axios';
 
-// Set base URL for API calls to avoid requiring a proxy restart in development
-axios.defaults.baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : '';
+// Set base URL for API calls
+axios.defaults.baseURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:5000'
+  : (process.env.REACT_APP_API_URL || 'https://halleyx-insyte-api.vercel.app');
 
 // Suppress DEP0060 warning
 if (typeof process !== 'undefined' && process.emitWarning) {

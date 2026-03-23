@@ -11,3 +11,6 @@ server/build/
 # Logs
 *.log
 .vercel
+
+# Local Netlify folder
+.netlify
